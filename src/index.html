@@ -9,7 +9,7 @@
       integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
       crossorigin="anonymous"
     />
-    <link rel="stylesheet" href="src/style.css" />
+
     <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -19,6 +19,97 @@
     />
     <title>Weather app</title>
   </head>
+  <style>
+    body {
+      background-color: #caa9aa;
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
+    }
+    h1 {
+      font-size: 40px;
+      font-weight: 600;
+      line-height: 48px;
+      margin: 20px 0 10px;
+    }
+    ul {
+      margin: 0;
+      padding: 0;
+    }
+    li {
+      font-size: 20px;
+      line-height: 25px;
+      list-style: none;
+    }
+    a {
+      text-decoration: none;
+      color: #e08b8e;
+    }
+    .weather-app {
+      font-family: "Quicksand", sans-serif;
+      max-width: 800px;
+      margin: 150px auto;
+      padding: 20px;
+      border: none;
+      border-radius: 25px;
+      background-color: rgba(242, 216, 216, 0.2);
+    }
+    .active {
+      color: #000;
+      cursor: text;
+    }
+    .weather-forecast {
+      margin-top: 20px;
+      text-align: center;
+      color: #000;
+    }
+    .weather-forecast-date {
+      font-size: 16px;
+      opacity: 0.5;
+    }
+    .weather-forecast-temperature {
+      font-size: 15px;
+    }
+    .weather-forecast-temperature-min {
+      opacity: 0.5;
+    }
+    #condition {
+      font-size: 20px;
+      line-height: 20px;
+      text-align: center;
+      padding: 0;
+      text-transform: capitalize;
+    }
+    #icon {
+      width: 75px;
+      position: relative;
+      bottom: 20px;
+    }
+    #temperature {
+      font-size: 80px;
+      font-weight: 600;
+      margin-top: 20px;
+    }
+    #units {
+      font-size: 25px;
+      font-weight: 400;
+      line-height: 1;
+      position: relative;
+      top: -34px;
+    }
+    #button {
+      background-color: #e08b8e;
+      border-color: #e08b8e;
+      border-radius: 10px;
+      padding: 5.5px;
+    }
+    #city-search {
+      background-color: rgba(253, 253, 254, 0.2);
+      border-color: rgba(253, 253, 254, 0.2);
+      box-shadow: 5px 5px 5px rgba(97, 90, 90, 0.1);
+    }
+  </style>
   <body>
     <div class="container">
       <div class="weather-app">
@@ -83,15 +174,119 @@
         </div>
         <hr />
         <small>
-          <a
-            href="https://github.com/TpRaphulu/WEEK-7"
-            target="_blank"
+          <a href="https://github.com/TpRaphulu/WEEK-7" target="_blank"
             >Open-sourse code</a
           >
-          by Thabiso Raphulu
+          Thabiso Raphulu
         </small>
       </div>
     </div>
-    <script src="src/app.js"></script>
+    <script>
+      let now = new Date();
+      let date = now.getDate();
+      let hours = now.getHours();
+      if (hours < 10) {
+        hours = `0${hours}`;
+      }
+      let minutes = now.getMinutes();
+      if (minutes < 10) {
+        minutes = `0${minutes}`;
+      }
+      let year = now.getFullYear();
+
+      let days = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ];
+      let day = days[now.getDay()];
+
+      let months = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+      let month = months[now.getMonth()];
+
+      let dateElement = document.querySelector("#date");
+      dateElement.innerHTML = `${day}, ${date} ${month} ${year} ${hours}:${minutes}`;
+
+      function displayTemperature(response) {
+        let temperatureElement = document.querySelector("#temperature");
+        let cityElement = document.querySelector("#city");
+        let conditionElement = document.querySelector("#condition");
+        let humidityElement = document.querySelector("#humidity");
+        let windElement = document.querySelector("#wind");
+        let iconElement = document.querySelector("#icon");
+
+        celsiusTemperature = response.data.main.temp;
+
+        temperatureElement.innerHTML = Math.round(celsiusTemperature);
+        cityElement.innerHTML = response.data.name;
+        conditionElement.innerHTML = response.data.weather[0].description;
+        humidityElement.innerHTML = response.data.main.humidity;
+        windElement.innerHTML = Math.round(response.data.wind.speed);
+        iconElement.setAttribute(
+          "src",
+          `http://openweathermap.org/img/wn/${response.data.weather[0].icon}@2x.png`
+        );
+        iconElement.setAttribute("alt", response.data.weather[0].description);
+      }
+
+      function search(city) {
+        let apiKey = "19523438540e9822a6b5458e16242094";
+        let apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+        axios.get(apiUrl).then(displayTemperature);
+      }
+
+      function handleSubmit(event) {
+        event.preventDefault();
+        let citySearchElement = document.querySelector("#city-search");
+        search(citySearchElement.value);
+      }
+
+      function displayFahrenheitTemp(event) {
+        event.preventDefault();
+        let temperatureElement = document.querySelector("#temperature");
+        celsiusLink.classList.remove("active");
+        fahrenheitLink.classList.add("active");
+        let fahrenheitTemperature = (celsiusTemperature * 9) / 5 + 32;
+        temperatureElement.innerHTML = Math.round(fahrenheitTemperature);
+      }
+
+      function displayCelsiusTemp(event) {
+        event.preventDefault();
+        let temperatureElement = document.querySelector("#temperature");
+        celsiusLink.classList.add("active");
+        fahrenheitLink.classList.remove("active");
+        temperatureElement.innerHTML = Math.round(celsiusTemperature);
+      }
+
+      let celsiusTemperature = null;
+
+      let form = document.querySelector("#search-form");
+      form.addEventListener("submit", handleSubmit);
+
+      let fahrenheitLink = document.querySelector("#fahrenheit-link");
+      fahrenheitLink.addEventListener("click", displayFahrenheitTemp);
+
+      let celsiusLink = document.querySelector("#celsius-link");
+      celsiusLink.addEventListener("click", displayCelsiusTemp);
+
+      search("London");
+    </script>
   </body>
 </html>
